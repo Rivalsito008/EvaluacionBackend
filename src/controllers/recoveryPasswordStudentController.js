@@ -2,7 +2,6 @@ import JsonWebToken from "jsonwebtoken"
 import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
-import HTMLRecoveryEmail from "../utils/sendMailRecoveryPassword.js"
 import {config} from "../config.js"
 import studentModel from "../models/student.js"
 
@@ -36,14 +35,6 @@ recoveryPasswordStudentController.requestCode = async (req, res) => {
             }
         })
 
-        const mailOptions = {
-            form: config.email.user_email,
-            to: email,
-            subject: "codigo de recuperacion de contraseña",
-            text: "El codigo expira en 15 minutos",
-            html: HTMLRecoveryEmail(randomCode)
-        }
-
         transporter.sendMail(mailOptions, (error, info) => {
             if(error){
                 console.log(error);
@@ -52,6 +43,22 @@ recoveryPasswordStudentController.requestCode = async (req, res) => {
 
             return res.status(200).json({message: "el correo se envio correctamente"})
         })
+
+        const mailOptions = {
+            from: config.email.user_email,
+            to: email,
+            subject: "codigo de recuperacion de contraseña",
+            text: "El codigo expira en 15 minutos" + randomCode
+        }
+
+        transporter.sendMail(mailOptions,(error, info) => {
+            if (error) {
+                console.log("error" + error)
+                return res.status(500).json({mesage: "error"})
+            }
+
+            return res.status(200).json({message: "email send"})
+        })        
     } catch (error){
         return res.status(500).json({message: error.message})
     }
@@ -61,7 +68,7 @@ recoveryPasswordStudentController.verifyCode = async (req, res) => {
     try {
         const {code} = req.body;
         const token = req.cookies.recoveryCookie;
-        const decoded = JsonWebToken.verify(token.config.JWT.secret)
+        const decoded = JsonWebToken.verify(token, config.JWT.secret)
 
         if(code !== decoded.randomCode){
             return res.status(400).json({message: "codigo incorrecto"})

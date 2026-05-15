@@ -4,7 +4,6 @@ import JsonWebToken from "jsonwebtoken"
 import bcryptjs from "bcryptjs"
 import studentModel from "../models/student.js"
 import {config} from "../config.js"
-import student from "../models/student.js"
 
 const registerStudentController = {};
 
@@ -15,12 +14,8 @@ registerStudentController.registrar = async (req, res) => {
             lastName,
             email,
             password,
-            birthdate,
             phone,
-            grade,
-            isVerified,
-            loginAttempts,
-            timeOut
+            grade
         } = req.body
 
         const exitStudent = await studentModel.findOne({email})
@@ -36,17 +31,13 @@ registerStudentController.registrar = async (req, res) => {
             lastName,
             email,
             password: passwordHash,
-            birthdate,
             phone,
             grade,
-            isVerified,
-            loginAttempts,
-            timeOut
         })
 
         await newStudent.save();
 
-        const verificationCode = crypto.randomeBytes(3).toString("hex")
+        const verificationCode = crypto.randomBytes(3).toString("hex")
 
         const tokenCode = JsonWebToken.sign(
             {email,verificationCode},
@@ -91,7 +82,7 @@ registerStudentController.verifyCode = async (req, res) => {
         const {verificationCode} = req.body
         const token = req.cookies.verificationTokenCookie
         const decoded = JsonWebToken.verify(token,config.JWT.secret)
-        const {email, verificationCode: stored} = decoded
+        const {email, verificationCode: storedCode} = decoded
 
         if(verificationCode !== storedCode){
             return res.status(400).json({message: "Invalid code"})

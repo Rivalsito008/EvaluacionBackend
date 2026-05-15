@@ -14,7 +14,7 @@ studentController.getStudents = async (req, res) => {
 
 studentController.deleteStudents = async (req, res) => {
     try {
-        const deletedStudents = await studentModel.findBtIdAndDelete(req.params.id);
+        const deletedStudents = await studentModel.findByIdAndDelete(req.params.id);
         if(!deletedStudents){
             return res.status(404).json({message: "student not found"})
         }
