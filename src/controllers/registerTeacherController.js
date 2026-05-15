@@ -2,42 +2,42 @@ import nodemailer from "nodemailer"
 import crypto from "crypto"
 import JsonWebToken from "jsonwebtoken"
 import bcryptjs from "bcryptjs"
-import studentModel from "../models/student.js"
+import teacherModel from "../models/teacher.js"
 import {config} from "../config.js"
 
-const registerStudentController = {};
+const registerTeacherController = {};
 
-registerStudentController.registrar = async (req, res) => {
+registerTeacherController.registrar = async (req, res) => {
     try {
         const {
             name,
             lastName,
             email,
             password,
-            birthdate,
             phone,
-            grade
+            speciality,
+            isActive
         } = req.body
 
-        const exitStudent = await studentModel.findOne({email})
+        const exitTeacher = await teacherModel.findOne({email})
 
-        if(exitStudent){
-            return res.status(400).json({message: "student already exist"})
+        if(exitTeacher){
+            return res.status(400).json({message: "teacher already exist"})
         }
 
         const passwordHash = await bcryptjs.hash(password, 10)
 
-        const newStudent = new studentModel({
-            name,
-            lastName,
-            email,
-            password: passwordHash,
-            birthdate,
-            phone,
-            grade,
+        const newTeacher = new teacherModel({
+                name,
+                lastName,
+                email,
+                password: passwordHash,
+                phone,
+                speciality,
+                isActive
         })
 
-        await newStudent.save();
+        await newTeacher.save();
 
         const verificationCode = crypto.randomBytes(3).toString("hex")
 
@@ -79,7 +79,7 @@ registerStudentController.registrar = async (req, res) => {
 
 }
 
-registerStudentController.verifyCode = async (req, res) => {
+registerTeacherController.verifyCode = async (req, res) => {
     try {
         const {verificationCode} = req.body
         const token = req.cookies.verificationTokenCookie
@@ -90,9 +90,9 @@ registerStudentController.verifyCode = async (req, res) => {
             return res.status(400).json({message: "Invalid code"})
         }
 
-        const student = await studentModel.findOne({email})
-        student.isVerified = true;
-        await student.save();
+        const teacher = await teacherModel.findOne({email})
+        teacher.isVerified = true;
+        await teacher.save();
 
         res.clearCookie("verificationTokenCookie")
         return res.status(200).json({message: "email verified succesfully"})
@@ -102,4 +102,4 @@ registerStudentController.verifyCode = async (req, res) => {
     }
 }
 
-export default registerStudentController
+export default registerTeacherController

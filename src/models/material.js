@@ -1,11 +1,11 @@
-import {Schema, model} from "mongoose"
+import mongoose, {Schema, model} from "mongoose"
 
 const materialSchema = new Schema ({
     subjectName:{
         type: String
     },
     teacher_id:{
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Types.ObjectId,
         ref: "Teacher"
     },
     isAvailable:{
@@ -16,4 +16,4 @@ const materialSchema = new Schema ({
     strict: false
 })
 
-export default model ("Material", materialSchema)
+export default model ("material", materialSchema)

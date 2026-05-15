@@ -3,14 +3,14 @@ import bcrypt from "bcryptjs"
 import crypto from "crypto"
 import nodemailer from "nodemailer"
 import {config} from "../config.js"
-import studentModel from "../models/student.js"
+import teacherModel from "../models/teacher.js"
 
-const recoveryPasswordStudentController = {};
+const recoveryPasswordTeacherController = {};
 
-recoveryPasswordStudentController.requestCode = async (req, res) => {
+recoveryPasswordTeacherController.requestCode = async (req, res) => {
     try {
         const {email} = req.body;
-        const userFound = await studentModel.findOneAndUpdat({email})
+        const userFound = await teacherModel.findOneAndUpdat({email})
 
         if(!userFound){
             return res.status (400).json({message: "user not found"})
@@ -21,7 +21,7 @@ recoveryPasswordStudentController.requestCode = async (req, res) => {
         const token = JsonWebToken.sign ({
             email,
             randomCode,
-            userType: "student",
+            userType: "teacher",
             verified: false,
         }, config.JWT.secret,{expiresIn: "15m"})
 
@@ -55,7 +55,7 @@ recoveryPasswordStudentController.requestCode = async (req, res) => {
     }
 }
 
-recoveryPasswordStudentController.verifyCode = async (req, res) => {
+recoveryPasswordTeacherController.verifyCode = async (req, res) => {
     try {
         const {code} = req.body;
         const token = req.cookies.recoveryCookie;
@@ -67,7 +67,7 @@ recoveryPasswordStudentController.verifyCode = async (req, res) => {
 
         const newToken = JsonWebToken.sign({
             email: decoded.email,
-            userType: "student",
+            userType: "teacher",
             verified: true
         }, config.JWT.secret,{
             expiresIn: "15m"
@@ -82,7 +82,7 @@ recoveryPasswordStudentController.verifyCode = async (req, res) => {
     }
 }
 
-recoveryPasswordStudentController.newPassword = async (req, res) => {
+recoveryPasswordTeacherController.newPassword = async (req, res) => {
     try {
         const {newPassword, confirmNewPassword} = req.body;
 
@@ -99,7 +99,7 @@ recoveryPasswordStudentController.newPassword = async (req, res) => {
 
         const passwordHash = await bcrypt.hash(newPassword, 10)
 
-        await studentModel.findOneAndUpdate({email: decoded.email}, {password: passwordHash}, {new: true})
+        await teacherModel.findOneAndUpdate({email: decoded.email}, {password: passwordHash}, {new: true})
 
         res.clearCookie("recoveryCookie");
         return res.status(200).json({message: "contraseña actualizada exitosamente"})
@@ -109,4 +109,4 @@ recoveryPasswordStudentController.newPassword = async (req, res) => {
     }
 }
 
-export default recoveryPasswordStudentController;
+export default recoveryPasswordTeacherController;

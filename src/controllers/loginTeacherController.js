@@ -1,17 +1,17 @@
 import bcrypt from "bcryptjs"
 import JsonWebToken from "jsonwebtoken"
-import studentModel from "../models/student.js"
+import teacherModel from "../models/teacher.js"
 import {config} from "../config.js"
 
-const loginStudentController = {};
+const loginTeacherController = {};
 
-loginStudentController.login = async (req, res) => {
+loginTeacherController.login = async (req, res) => {
     try{
         const {email, password} = req.body;
-    const userFound = await studentModel.findOne({email})
+    const userFound = await teacherModel.findOne({email})
 
     if(!userFound){
-        return res.status(404).json({message: "Student not found"})
+        return res.status(404).json({message: "teacher not found"})
     }
     if(userFound.timeOut && userFound.timeOut > Date.now()){
         return res.status(403).json({message: "Cuenta bloqueada"})
@@ -38,7 +38,7 @@ loginStudentController.login = async (req, res) => {
     await userFound.save();
 
     const token = JsonWebToken.sign(
-        {id: userFound._id, userType: "student"},
+        {id: userFound._id, userType: "teacher"},
         config.JWT.secret,
         {expiresIn: "30d"}
     )
@@ -51,4 +51,4 @@ loginStudentController.login = async (req, res) => {
     }
 }
 
-export default loginStudentController;
+export default loginTeacherController;
