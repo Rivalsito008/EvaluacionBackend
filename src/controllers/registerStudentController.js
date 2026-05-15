@@ -14,6 +14,7 @@ registerStudentController.registrar = async (req, res) => {
             lastName,
             email,
             password,
+            birthdate,
             phone,
             grade
         } = req.body
@@ -31,6 +32,7 @@ registerStudentController.registrar = async (req, res) => {
             lastName,
             email,
             password: passwordHash,
+            birthdate,
             phone,
             grade,
         })
